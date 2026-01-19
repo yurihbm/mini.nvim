@@ -2595,10 +2595,10 @@ H.picker_set_bordertext = function(picker)
     local prompt = {
       { prompt_prefix, 'MiniPickPromptPrefix' },
       { prompt_caret, 'MiniPickPromptCaret' },
-      { prompt_suffix, 'MiniPickPromptSuffix' },
     }
     if after_caret ~= '' then table.insert(prompt, 3, { after_caret .. pad_right, 'MiniPickPrompt' }) end
     if before_caret ~= '' then table.insert(prompt, 2, { pad_left .. before_caret, 'MiniPickPrompt' }) end
+    if prompt_suffix ~= '' then table.insert(prompt, { prompt_suffix, 'MiniPickPromptSuffix' }) end
     config = { title = prompt }
   end
 
