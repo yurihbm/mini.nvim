@@ -791,6 +791,9 @@ end
 ---
 --- `window.prompt_prefix` defines what prefix is used in window's prompt.
 --- Default: '> '.
+---
+--- `window.prompt_max_width` defines a max width for prompt (in characters).
+--- Default: nil.
 MiniPick.config = {
   -- Delays (in ms; should be at least 1)
   delay = {
@@ -873,6 +876,9 @@ MiniPick.config = {
 
     -- String to use as prefix in prompt
     prompt_prefix = '> ',
+
+    -- Integer defining prompt max width (in characters)
+    prompt_max_width = nil,
   },
 }
 --minidoc_afterlines_end
@@ -1986,6 +1992,7 @@ H.setup_config = function(config)
   end
   H.check_type('window.prompt_caret', config.window.prompt_caret, 'string')
   H.check_type('window.prompt_prefix', config.window.prompt_prefix, 'string')
+  H.check_type('window.prompt_max_width', config.window.prompt_max_width, 'number', true)
 
   return config
 end
@@ -2559,7 +2566,13 @@ H.picker_set_bordertext = function(picker)
   if view_state == 'main' then
     local caret, query = picker.caret, picker.query
     local prompt_prefix, prompt_caret = opts.window.prompt_prefix, opts.window.prompt_caret
-    local max_width = math.max(1, win_width - vim.fn.strchars(prompt_prefix) - vim.fn.strchars(prompt_caret))
+    local prompt_max_width = opts.window.prompt_max_width
+
+    local available_width = win_width
+    if type(prompt_max_width) == 'number' and prompt_max_width > 0 then
+      available_width = math.min(win_width, prompt_max_width)
+    end
+    local max_width = math.max(1, available_width - vim.fn.strchars(prompt_prefix) - vim.fn.strchars(prompt_caret))
 
     -- Try to put caret in the center if there is not enough room to show the
     -- whole query (as in 'mini.tabline'). Do that after concatenating query
