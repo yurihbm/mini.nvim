@@ -951,6 +951,15 @@ T['start()']['respects `window.prompt_caret`'] = function()
   child.expect_screenshot()
 end
 
+T['start()']['respects `window.prompt_highlight_caret_position`'] = function()
+  start({ source = { items = { 'a', 'b', 'c' } }, window = { prompt_highlight_caret_position = true } })
+  type_keys('a', 'b', '<Left>')
+  local win_id = child.api.nvim_get_current_win()
+  local win_config = child.api.nvim_win_get_config(win_id)
+  local ref_title = { { '> ', 'MiniPickPromptPrefix' }, { 'a', 'MiniPickPrompt' }, { 'b', 'MiniPickPromptCaretPosition' } }
+  eq(win_config.title, ref_title)
+end
+
 T['start()']['respects `window.prompt_prefix`'] = function()
   local validate = function(prefix)
     start({ source = { items = { 'a', 'b', 'c' } }, window = { prompt_prefix = prefix } })
