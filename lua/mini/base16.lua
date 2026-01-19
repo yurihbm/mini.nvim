@@ -815,6 +815,7 @@ H.apply_palette = function(palette, use_cterm)
     hi('MiniPickPrompt',        {link='MiniPickMatchRanges'})
     hi('MiniPickPromptCaret' ,  {fg=p.base0B, bg=p.base01, attr=nil,         sp=nil})
     hi('MiniPickPromptPrefix',  {fg=p.base0B, bg=p.base01, attr=nil,         sp=nil})
+    hi('MiniPickPromptSuffix',  {fg=p.base0B, bg=p.base01, attr=nil,         sp=nil})
 
     hi('MiniSnippetsCurrent',        {fg=nil, bg=nil, attr='underdouble', sp=p.base0E})
     hi('MiniSnippetsCurrentReplace', {fg=nil, bg=nil, attr='underdouble', sp=p.base08})
