@@ -796,6 +796,12 @@ end
 ---
 --- `window.prompt_suffix` defines what suffix is used in window's prompt.
 --- Default: ''.
+---
+--- `window.prompt_max_width` defines a max width for prompt (in characters).
+--- Default: nil.
+---
+--- `window.prompt_fixed_width` defines if prompt should have fixed width (prompt_max_width should be set).
+--- Default: false.
 MiniPick.config = {
   -- Delays (in ms; should be at least 1)
   delay = {
@@ -884,6 +890,12 @@ MiniPick.config = {
 
     -- Whether to highligh caret position instead of inserting caret char
     prompt_highlight_caret_position = false,
+
+    -- Integer defining prompt max width (in characters)
+    prompt_max_width = nil,
+
+    -- Boolean defining whether prompt should have fixed width
+    prompt_fixed_width = false,
   },
 }
 --minidoc_afterlines_end
@@ -1999,6 +2011,8 @@ H.setup_config = function(config)
   H.check_type('window.prompt_prefix', config.window.prompt_prefix, 'string')
   H.check_type('window.prompt_suffix', config.window.prompt_suffix, 'string')
   H.check_type('window.prompt_highlight_caret_position', config.window.prompt_highlight_caret_position, 'boolean')
+  H.check_type('window.prompt_max_width', config.window.prompt_max_width, 'number', true)
+  H.check_type('window.prompt_fixed_width', config.window.prompt_fixed_width, 'boolean')
 
   return config
 end
@@ -2576,9 +2590,18 @@ H.picker_set_bordertext = function(picker)
     local prompt_prefix, prompt_caret = opts.window.prompt_prefix, opts.window.prompt_caret
     local prompt_suffix = opts.window.prompt_suffix
     local prompt_highlight_caret_position = opts.window.prompt_highlight_caret_position
+    local prompt_max_width = opts.window.prompt_max_width
+    local prompt_fixed_width = opts.window.prompt_fixed_width
+
+    local available_width = win_width
+    local has_prompt_max_width = false
+    if type(prompt_max_width) == 'number' and prompt_max_width > 0 then
+      has_prompt_max_width = true
+      available_width = math.min(win_width, prompt_max_width)
+    end
     local max_width = math.max(
       1,
-      win_width - vim.fn.strchars(prompt_prefix) - vim.fn.strchars(prompt_caret) - vim.fn.strchars(prompt_suffix)
+      available_width - vim.fn.strchars(prompt_prefix) - vim.fn.strchars(prompt_caret) - vim.fn.strchars(prompt_suffix)
     )
 
     -- Try to put caret in the center if there is not enough room to show the
@@ -2612,6 +2635,18 @@ H.picker_set_bordertext = function(picker)
       table.insert(prompt, { prompt_caret, 'MiniPickPromptCaret' })
     end
     if after_caret ~= '' then table.insert(prompt, { after_caret .. pad_right, 'MiniPickPrompt' }) end
+
+    -- Pad prompt to fill fixed width if enabled
+    if prompt_fixed_width and has_prompt_max_width then
+      local prompt_len = vim.fn.strchars(prompt_prefix)
+        + vim.fn.strchars(prompt_caret)
+        + vim.fn.strchars(pad_left .. before_caret)
+        + vim.fn.strchars(after_caret .. pad_right)
+        + vim.fn.strchars(prompt_suffix)
+      local pad_needed = available_width - prompt_len
+      if pad_needed > 0 then table.insert(prompt, { string.rep(' ', pad_needed), 'MiniPickPrompt' }) end
+    end
+
     if prompt_suffix ~= '' then table.insert(prompt, { prompt_suffix, 'MiniPickPromptSuffix' }) end
 
     config = { title = prompt }
