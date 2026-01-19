@@ -1018,6 +1018,7 @@ MiniHues.apply_palette = function(palette, plugins, opts)
     hi('MiniPickPromptCaret',   { link='DiagnosticFloatingInfo' })
     hi('MiniPickPromptPrefix',  { link='DiagnosticFloatingInfo' })
     hi('MiniPickPromptSuffix',  { link='DiagnosticFloatingInfo' })
+    hi('MiniPickPromptCaretPosition',  { link='Cursor' })
 
     hi('MiniSnippetsCurrent',        { fg=nil, bg=nil, sp=p.yellow, underdouble=true })
     hi('MiniSnippetsCurrentReplace', { fg=nil, bg=nil, sp=p.red,    underdouble=true })

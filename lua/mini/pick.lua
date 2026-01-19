@@ -129,6 +129,7 @@
 --- - `MiniPickPromptCaret` - caret in prompt.
 --- - `MiniPickPromptPrefix` - prefix of the prompt.
 --- - `MiniPickPromptSuffix` - suffix of the prompt.
+--- - `MiniPickPromptCaretPosition` - current caret position in prompt.
 ---
 --- To change any highlight group, set it directly with |nvim_set_hl()|.
 ---@tag MiniPick
@@ -880,6 +881,9 @@ MiniPick.config = {
 
     -- String to use as suffix in prompt
     prompt_suffix = '',
+
+    -- Whether to highligh caret position instead of inserting caret char
+    prompt_highlight_caret_position = false,
   },
 }
 --minidoc_afterlines_end
@@ -1994,6 +1998,7 @@ H.setup_config = function(config)
   H.check_type('window.prompt_caret', config.window.prompt_caret, 'string')
   H.check_type('window.prompt_prefix', config.window.prompt_prefix, 'string')
   H.check_type('window.prompt_suffix', config.window.prompt_suffix, 'string')
+  H.check_type('window.prompt_highlight_caret_position', config.window.prompt_highlight_caret_position, 'boolean')
 
   return config
 end
@@ -2048,6 +2053,7 @@ H.create_default_hl = function()
   hi('MiniPickPromptCaret',   { link = 'MiniPickPrompt' })
   hi('MiniPickPromptPrefix',  { link = 'MiniPickPrompt' })
   hi('MiniPickPromptSuffix',  { link = 'MiniPickPrompt' })
+  hi('MiniPickPromptCaretPosition',  { link = 'Cursor' })
 end
 
 H.create_user_commands = function()
@@ -2569,6 +2575,7 @@ H.picker_set_bordertext = function(picker)
     local caret, query = picker.caret, picker.query
     local prompt_prefix, prompt_caret = opts.window.prompt_prefix, opts.window.prompt_caret
     local prompt_suffix = opts.window.prompt_suffix
+    local prompt_highlight_caret_position = opts.window.prompt_highlight_caret_position
     local max_width = math.max(
       1,
       win_width - vim.fn.strchars(prompt_prefix) - vim.fn.strchars(prompt_caret) - vim.fn.strchars(prompt_suffix)
@@ -2592,13 +2599,21 @@ H.picker_set_bordertext = function(picker)
     before_caret = vim.fn.strcharpart(before_caret, w_before - w_left, w_left)
     after_caret = vim.fn.strcharpart(after_caret, 0, w_right)
 
-    local prompt = {
-      { prompt_prefix, 'MiniPickPromptPrefix' },
-      { prompt_caret, 'MiniPickPromptCaret' },
-      { prompt_suffix, 'MiniPickPromptSuffix' },
-    }
-    if after_caret ~= '' then table.insert(prompt, 3, { after_caret .. pad_right, 'MiniPickPrompt' }) end
-    if before_caret ~= '' then table.insert(prompt, 2, { pad_left .. before_caret, 'MiniPickPrompt' }) end
+    local prompt = { { prompt_prefix, 'MiniPickPromptPrefix' } }
+
+    if before_caret ~= '' then table.insert(prompt, { pad_left .. before_caret, 'MiniPickPrompt' }) end
+    if prompt_highlight_caret_position and after_caret ~= '' then
+      -- Use MiniPickPromptCaretPosition to highlight character under caret
+      local char_under = vim.fn.strcharpart(after_caret, 0, 1)
+      table.insert(prompt, { char_under, 'MiniPickPromptCaretPosition' })
+      after_caret = vim.fn.strcharpart(after_caret, 1)
+    else
+      -- Default caret insertion
+      table.insert(prompt, { prompt_caret, 'MiniPickPromptCaret' })
+    end
+    if after_caret ~= '' then table.insert(prompt, { after_caret .. pad_right, 'MiniPickPrompt' }) end
+    if prompt_suffix ~= '' then table.insert(prompt, { prompt_suffix, 'MiniPickPromptSuffix' }) end
+
     config = { title = prompt }
   end
 
