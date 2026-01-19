@@ -128,6 +128,7 @@
 --- - `MiniPickPrompt` - prompt.
 --- - `MiniPickPromptCaret` - caret in prompt.
 --- - `MiniPickPromptPrefix` - prefix of the prompt.
+--- - `MiniPickPromptSuffix` - suffix of the prompt.
 ---
 --- To change any highlight group, set it directly with |nvim_set_hl()|.
 ---@tag MiniPick
@@ -791,6 +792,9 @@ end
 ---
 --- `window.prompt_prefix` defines what prefix is used in window's prompt.
 --- Default: '> '.
+---
+--- `window.prompt_suffix` defines what suffix is used in window's prompt.
+--- Default: ''.
 MiniPick.config = {
   -- Delays (in ms; should be at least 1)
   delay = {
@@ -873,6 +877,9 @@ MiniPick.config = {
 
     -- String to use as prefix in prompt
     prompt_prefix = '> ',
+
+    -- String to use as suffix in prompt
+    prompt_suffix = '',
   },
 }
 --minidoc_afterlines_end
@@ -1986,6 +1993,7 @@ H.setup_config = function(config)
   end
   H.check_type('window.prompt_caret', config.window.prompt_caret, 'string')
   H.check_type('window.prompt_prefix', config.window.prompt_prefix, 'string')
+  H.check_type('window.prompt_suffix', config.window.prompt_suffix, 'string')
 
   return config
 end
@@ -2039,6 +2047,7 @@ H.create_default_hl = function()
   hi('MiniPickPrompt',        { link = 'DiagnosticFloatingInfo' })
   hi('MiniPickPromptCaret',   { link = 'MiniPickPrompt' })
   hi('MiniPickPromptPrefix',  { link = 'MiniPickPrompt' })
+  hi('MiniPickPromptSuffix',  { link = 'MiniPickPrompt' })
 end
 
 H.create_user_commands = function()
@@ -2559,7 +2568,11 @@ H.picker_set_bordertext = function(picker)
   if view_state == 'main' then
     local caret, query = picker.caret, picker.query
     local prompt_prefix, prompt_caret = opts.window.prompt_prefix, opts.window.prompt_caret
-    local max_width = math.max(1, win_width - vim.fn.strchars(prompt_prefix) - vim.fn.strchars(prompt_caret))
+    local prompt_suffix = opts.window.prompt_suffix
+    local max_width = math.max(
+      1,
+      win_width - vim.fn.strchars(prompt_prefix) - vim.fn.strchars(prompt_caret) - vim.fn.strchars(prompt_suffix)
+    )
 
     -- Try to put caret in the center if there is not enough room to show the
     -- whole query (as in 'mini.tabline'). Do that after concatenating query
@@ -2579,7 +2592,11 @@ H.picker_set_bordertext = function(picker)
     before_caret = vim.fn.strcharpart(before_caret, w_before - w_left, w_left)
     after_caret = vim.fn.strcharpart(after_caret, 0, w_right)
 
-    local prompt = { { prompt_prefix, 'MiniPickPromptPrefix' }, { prompt_caret, 'MiniPickPromptCaret' } }
+    local prompt = {
+      { prompt_prefix, 'MiniPickPromptPrefix' },
+      { prompt_caret, 'MiniPickPromptCaret' },
+      { prompt_suffix, 'MiniPickPromptSuffix' },
+    }
     if after_caret ~= '' then table.insert(prompt, 3, { after_caret .. pad_right, 'MiniPickPrompt' }) end
     if before_caret ~= '' then table.insert(prompt, 2, { pad_left .. before_caret, 'MiniPickPrompt' }) end
     config = { title = prompt }
