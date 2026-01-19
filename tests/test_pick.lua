@@ -956,7 +956,8 @@ T['start()']['respects `window.prompt_highlight_caret_position`'] = function()
   type_keys('a', 'b', '<Left>')
   local win_id = child.api.nvim_get_current_win()
   local win_config = child.api.nvim_win_get_config(win_id)
-  local ref_title = { { '> ', 'MiniPickPromptPrefix' }, { 'a', 'MiniPickPrompt' }, { 'b', 'MiniPickPromptCaretPosition' } }
+  local ref_title =
+    { { '> ', 'MiniPickPromptPrefix' }, { 'a', 'MiniPickPrompt' }, { 'b', 'MiniPickPromptCaretPosition' } }
   eq(win_config.title, ref_title)
 end
 
@@ -998,6 +999,21 @@ T['start()']['respects `window.prompt_fixed_width`'] = function()
     { 'a', 'MiniPickPrompt' },
     { '▏', 'MiniPickPromptCaret' },
     { '      ', 'MiniPickPrompt' },
+  }
+  eq(win_config.title, ref_title)
+end
+
+T['start()']['respects `window.prompt_suffix`'] = function()
+  start({ source = { items = { 'a', 'b', 'c' } }, window = { prompt_suffix = ' <' } })
+  type_keys('a')
+
+  local win_id = child.api.nvim_get_current_win()
+  local win_config = child.api.nvim_win_get_config(win_id)
+  local ref_title = {
+    { '> ', 'MiniPickPromptPrefix' },
+    { 'a', 'MiniPickPrompt' },
+    { '▏', 'MiniPickPromptCaret' },
+    { ' <', 'MiniPickPromptSuffix' },
   }
   eq(win_config.title, ref_title)
 end

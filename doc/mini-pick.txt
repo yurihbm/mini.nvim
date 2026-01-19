@@ -130,6 +130,7 @@ See |mini.nvim-buffer-local-config| for more details.
 - `MiniPickPrompt` - prompt.
 - `MiniPickPromptCaret` - caret in prompt.
 - `MiniPickPromptPrefix` - prefix of the prompt.
+- `MiniPickPromptSuffix` - suffix of the prompt.
 - `MiniPickPromptCaretPosition` - current caret position in prompt.
 
 To change any highlight group, set it directly with |nvim_set_hl()|.
@@ -787,14 +788,17 @@ Defaults ~
       -- String to use as prefix in prompt
       prompt_prefix = '> ',
 
+      -- String to use as suffix in prompt
+      prompt_suffix = '',
+
+      -- Whether to highligh caret position instead of inserting caret char
+      prompt_highlight_caret_position = false,
+
       -- Integer defining prompt max width (in characters)
       prompt_max_width = nil,
 
       -- Boolean defining whether prompt should have fixed width
       prompt_fixed_width = false,
-
-      -- Whether to highligh caret position instead of inserting caret char
-      prompt_highlight_caret_position = false,
     },
   }
 <
@@ -851,6 +855,9 @@ Default: '▏'.
 
 `window.prompt_prefix` defines what prefix is used in window's prompt.
 Default: '> '.
+
+`window.prompt_suffix` defines what suffix is used in window's prompt.
+Default: ''.
 
 `window.prompt_max_width` defines a max width for prompt (in characters).
 Default: nil.
