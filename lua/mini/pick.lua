@@ -794,6 +794,9 @@ end
 ---
 --- `window.prompt_max_width` defines a max width for prompt (in characters).
 --- Default: nil.
+---
+--- `window.prompt_fixed_width` defines if prompt should have fixed width (prompt_max_width should be set).
+--- Default: false.
 MiniPick.config = {
   -- Delays (in ms; should be at least 1)
   delay = {
@@ -879,6 +882,9 @@ MiniPick.config = {
 
     -- Integer defining prompt max width (in characters)
     prompt_max_width = nil,
+
+    -- Boolean defining whether prompt should have fixed width
+    prompt_fixed_width = false,
   },
 }
 --minidoc_afterlines_end
@@ -1993,6 +1999,7 @@ H.setup_config = function(config)
   H.check_type('window.prompt_caret', config.window.prompt_caret, 'string')
   H.check_type('window.prompt_prefix', config.window.prompt_prefix, 'string')
   H.check_type('window.prompt_max_width', config.window.prompt_max_width, 'number', true)
+  H.check_type('window.prompt_fixed_width', config.window.prompt_fixed_width, 'boolean')
 
   return config
 end
@@ -2567,9 +2574,12 @@ H.picker_set_bordertext = function(picker)
     local caret, query = picker.caret, picker.query
     local prompt_prefix, prompt_caret = opts.window.prompt_prefix, opts.window.prompt_caret
     local prompt_max_width = opts.window.prompt_max_width
+    local prompt_fixed_width = opts.window.prompt_fixed_width
 
     local available_width = win_width
+    local has_prompt_max_width = false
     if type(prompt_max_width) == 'number' and prompt_max_width > 0 then
+      has_prompt_max_width = true
       available_width = math.min(win_width, prompt_max_width)
     end
     local max_width = math.max(1, available_width - vim.fn.strchars(prompt_prefix) - vim.fn.strchars(prompt_caret))
@@ -2595,6 +2605,15 @@ H.picker_set_bordertext = function(picker)
     local prompt = { { prompt_prefix, 'MiniPickPromptPrefix' }, { prompt_caret, 'MiniPickPromptCaret' } }
     if after_caret ~= '' then table.insert(prompt, 3, { after_caret .. pad_right, 'MiniPickPrompt' }) end
     if before_caret ~= '' then table.insert(prompt, 2, { pad_left .. before_caret, 'MiniPickPrompt' }) end
+
+    -- Pad prompt to fill fixed width if enabled
+    if prompt_fixed_width and has_prompt_max_width then
+      local prompt_len = vim.fn.strchars(prompt_prefix) + vim.fn.strchars(prompt_caret)
+        + vim.fn.strchars(pad_left .. before_caret) + vim.fn.strchars(after_caret .. pad_right)
+      local pad_needed = available_width - prompt_len
+      if pad_needed > 0 then table.insert(prompt, { string.rep(' ', pad_needed), 'MiniPickPrompt' }) end
+    end
+
     config = { title = prompt }
   end
 
