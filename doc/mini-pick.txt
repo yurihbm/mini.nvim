@@ -785,6 +785,12 @@ Defaults ~
 
       -- String to use as prefix in prompt
       prompt_prefix = '> ',
+
+      -- Integer defining prompt max width (in characters)
+      prompt_max_width = nil,
+
+      -- Boolean defining whether prompt should have fixed width
+      prompt_fixed_width = false,
     },
   }
 <
@@ -841,6 +847,12 @@ Default: '▏'.
 
 `window.prompt_prefix` defines what prefix is used in window's prompt.
 Default: '> '.
+
+`window.prompt_max_width` defines a max width for prompt (in characters).
+Default: nil.
+
+`window.prompt_fixed_width` defines if prompt should have fixed width (prompt_max_width should be set).
+Default: false.
 
 ------------------------------------------------------------------------------
                                                               *MiniPick.start()*

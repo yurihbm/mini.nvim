@@ -964,6 +964,35 @@ T['start()']['respects `window.prompt_prefix`'] = function()
   validate('')
 end
 
+T['start()']['respects `window.prompt_max_width`'] = function()
+  start({ source = { items = { 'abc' } }, window = { prompt_max_width = 5 } })
+  type_keys('a', 'b', 'c')
+
+  local win_id = child.api.nvim_get_current_win()
+  local win_config = child.api.nvim_win_get_config(win_id)
+  local ref_title = {
+    { '> ', 'MiniPickPromptPrefix' },
+    { '…c', 'MiniPickPrompt' },
+    { '▏', 'MiniPickPromptCaret' },
+  }
+  eq(win_config.title, ref_title)
+end
+
+T['start()']['respects `window.prompt_fixed_width`'] = function()
+  start({ source = { items = { 'a' } }, window = { prompt_max_width = 10, prompt_fixed_width = true } })
+  type_keys('a')
+
+  local win_id = child.api.nvim_get_current_win()
+  local win_config = child.api.nvim_win_get_config(win_id)
+  local ref_title = {
+    { '> ', 'MiniPickPromptPrefix' },
+    { 'a', 'MiniPickPrompt' },
+    { '▏', 'MiniPickPromptCaret' },
+    { '      ', 'MiniPickPrompt' },
+  }
+  eq(win_config.title, ref_title)
+end
+
 T['start()']['stops currently active picker'] = function()
   start_with_items({ 'a', 'b', 'c' })
   eq(is_picker_active(), true)
